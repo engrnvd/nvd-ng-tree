@@ -1,0 +1,10 @@
+<script type="text/ng-template" id="field_renderer.html">
+    {{item.label}}
+    <ul ng-if="item.children">
+        <li ng-repeat="item in item.children" ng-include="'field_renderer.html'"></li>
+    </ul>
+</script>
+
+<ul>
+    <li ng-repeat="item in items" ng-include="'field_renderer.html'"></li>
+</ul>
