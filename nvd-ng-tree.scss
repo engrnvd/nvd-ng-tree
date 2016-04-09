@@ -1,0 +1,40 @@
+.nvd-ng-tree
+{
+  padding-left: 2em;
+
+  li
+  {
+    list-style: none;
+  }
+
+  .fa
+  {
+    color: green;
+  }
+
+  .node
+  {
+    cursor: pointer;
+    padding: 0.2em 0.5em;
+    border: 1px solid transparent;
+  }
+  .node:hover
+  {
+    $bkg : #baedf0;
+    $bkg-dark: darken($bkg, 10%);
+    background-color: $bkg;
+    border: 1px solid $bkg-dark;
+  }
+
+  .node-opener
+  {
+    cursor: pointer;
+    padding-right: 0.3em;
+  }
+
+  ul
+  {
+    padding-left: 2em;
+  }
+
+}

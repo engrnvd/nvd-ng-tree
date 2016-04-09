@@ -58,7 +58,7 @@ angular.module('myApp', [])
         ];
     }])
 
-    .directive('nvdNgTree', function () {
+    .directive('nvdNgTree',['NvdNgTreeNodeService', function (Node) {
         return {
             restrict: 'E',
             templateUrl: 'nvd-ng-tree.html',
@@ -66,7 +66,45 @@ angular.module('myApp', [])
                 items: '=items'
             },
             link: function (scope, elem, attrs) {
-
+                scope.nodes = Node.makeNodes(scope.items);
             }
         };
-    });
+    }])
+
+    .factory('NvdNgTreeNodeService', function () {
+        var Node = function (data) {
+            this.id = null;
+            this.label = "";
+            this.children = null;
+            this.parent = null;
+            this.selected = false;
+            this.opened = false;
+
+            for ( var prop in data )
+                this[prop] = data[prop];
+
+            if(this.children)
+                this.children = Node.makeNodes(this.children);
+        };
+
+        Node.makeNodes = function (items) {
+            var collection = [];
+            for (var $i = 0; $i < items.length; $i++) {
+                collection.push(new Node(items[$i]));
+            }
+            return collection;
+        };
+
+        Node.prototype.toggleOpen = function () {
+            this.opened = !this.opened;
+        };
+
+        Node.prototype.toggleSelected = function () {
+            this.selected = !this.selected;
+        };
+
+        // build the api and return it
+        return Node;
+
+    })
+;

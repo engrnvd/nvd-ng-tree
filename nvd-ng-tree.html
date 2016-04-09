@@ -1,10 +1,23 @@
-<script type="text/ng-template" id="field_renderer.html">
-    {{item.label}}
-    <ul ng-if="item.children">
-        <li ng-repeat="item in item.children" ng-include="'field_renderer.html'"></li>
+<script type="text/ng-template" id="node_renderer.html">
+    <span class="node-opener" ng-click="node.toggleOpen()">
+        <i class="fa fa-caret-right fa-lg" ng-if="node.children && !node.opened"></i>
+        <i class="fa fa-caret-down fa-lg" ng-if="node.children && node.opened"></i>
+        <i class="fa fa-lg" ng-if="!node.children">&nbsp;</i>
+    </span>
+
+    <span class="node" ng-click="node.toggleSelected()">
+        <i ng-if="node.selected" class="fa fa-check-square"></i>
+        <i ng-if="!node.selected" class="fa fa-square-o"></i>
+        <i ng-if="!node.selected && node.children && false" class="fa fa-square"></i>&nbsp;
+        {{node.label}}
+    </span>
+
+    <ul ng-if="node.children && node.opened">
+        <li ng-repeat="node in node.children" ng-include="'node_renderer.html'"></li>
     </ul>
+
 </script>
 
-<ul>
-    <li ng-repeat="item in items" ng-include="'field_renderer.html'"></li>
+<ul class="nvd-ng-tree" onselectstart="return false;" onmousedown="return false;">
+    <li ng-repeat="node in nodes" ng-include="'node_renderer.html'"></li>
 </ul>
