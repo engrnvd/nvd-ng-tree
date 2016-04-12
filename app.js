@@ -71,7 +71,9 @@ angular.module('myApp', [])
                 items: '=items'
             },
             link: function (scope, elem, attrs) {
-                scope.tree = new Tree(scope.items);
+                scope.tree = new Tree({
+                    nodes: scope.items
+                });
             }
         };
     }])
@@ -88,15 +90,6 @@ angular.module('myApp', [])
 
             for ( var prop in data )
                 this[prop] = data[prop];
-
-            if(this.children)
-            {
-                this.children = Node.makeNodes( this.children );
-                var parentId = this.id;
-                _.map(this.children, function (node) {
-                    node.parentId = parentId;
-                });
-            }
         };
 
         Node.makeNodes = function (items) {
@@ -111,10 +104,10 @@ angular.module('myApp', [])
             this.opened = !this.opened;
         };
 
-        Node.prototype.toggleChecked = function (collection) {
+        Node.prototype.toggleChecked = function (tree) {
             this.setChecked(!this.checked);
             // update parent status
-            this.updateParentCheckedStatus(collection);
+            this.updateParentCheckedStatus(tree);
         };
 
         Node.prototype.setChecked = function (value) {
@@ -129,12 +122,10 @@ angular.module('myApp', [])
             }
         };
 
-        Node.prototype.updateParentCheckedStatus = function (collection) {
+        Node.prototype.updateParentCheckedStatus = function (tree) {
             var thisNode = this;
             if (thisNode.parentId) {
-                console.log("the node has parent");
-                var parentNode = thisNode.getParent(collection);
-                console.log(parentNode);
+                var parentNode = thisNode.getParent(tree.nodes);
                 var allChecked = true;
                 var someChecked = false;
                 _.map(parentNode.children, function (childNode) {
@@ -146,7 +137,7 @@ angular.module('myApp', [])
                 parentNode.hasCheckedChildren = someChecked;
 
                 if(parentNode.parentId)
-                    parentNode.updateParentCheckedStatus(collection);
+                    parentNode.updateParentCheckedStatus(tree);
             }
         };
 
@@ -170,13 +161,28 @@ angular.module('myApp', [])
     })
 
     .factory('NvdNgTreeService',['NvdNgTreeNodeService', function (Node) {
-        var Tree = function (items) {
-            var thisTree;
-            this.nodes = Node.makeNodes(items);
+        var Tree = function (config) {
+            // default props
+            this.parentKey = "parentId";
+            this.nodeLabel = function (node) {
+                return node.id + ": " +node.label;
+            };
+            this._nextId = 1;
+
+            // override with user defined properties
+            for (var prop in config)
+                this[prop] = config[prop];
+
+            // make nodes
+            this.nodes = Node.makeNodes(config.nodes);
         };
 
         Tree.prototype.getChecked = function () {
-
+            return _.where(this.nodes, function (node) {
+                if(node.checked)
+                    console.log(node.label+" is checked");
+                return node.checked === true;
+            });
         };
 
         // build the api and return it
