@@ -10,7 +10,7 @@
         <i ng-if="node.checked" class="fa fa-check-square"></i>
         <i ng-if="!node.checked && !node.hasCheckedChildren" class="fa fa-square-o"></i>
         <i ng-if="!node.checked && node.hasCheckedChildren" class="fa fa-square"></i>&nbsp;
-        {{tree.nodeLabel(node)}}
+        {{node.label}}
     </span>
 
     <ul ng-if="node.children && node.opened">
@@ -23,4 +23,4 @@
     <li ng-repeat="node in tree.nodes" ng-include="'node_renderer.html'"></li>
 </ul>
 
-        <pre>{{tree.getChecked()|json}}</pre>
+        <pre>{{tree|json}}</pre>
