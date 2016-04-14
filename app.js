@@ -3,19 +3,63 @@
 angular.module('myApp', [])
     .controller('MainCtrl', ['$scope', function ($scope) {
         $scope.data = [
-            {id: 1,label: "Naveed",opened: true},
-            {id: 1.1,label: "Angular",parentId:1},
-            {id: 1.2,label: "Laravel", parentId: 1},
-            {id: 1.11,label: "Angular", parentId: 1.1},
-            {id: 1.12,label: "Laravel", parentId: 1.1},
-            {id: 1.121, label: 'elixir', parentId: 1.12},
-            {id: 1.122, label: 'policies', parentId: 1.12},
-            {id: 2,label: "Ali"},
-            {id: 2.1, label: "PHP", parentId: 2},
-            {id: 2.2, label: "NetSuite", parentId: 2},
-            {id: 3,label: "Basit"},
-            {id: 3.1, label: "Node", parentId: 3},
-            {id: 3.2, label: "Mongo", parentId: 3}
+            {
+                id: 1,
+                label: "Naveed",
+                opened: true,
+                children: [
+                    {
+                        id: 1.1,
+                        label: "Angular",
+                        children: [
+                            {
+                                id: 1.11,
+                                label: "Angular"
+                            },
+                            {
+                                id: 1.12,
+                                label: "Laravel",
+                                children: [
+                                    {id: 1.121,label:'elixir'},
+                                    {id: 1.122,label:'policies'}
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 1.2,
+                        label: "Laravel"
+                    }
+                ]
+            },
+            {
+                id: 2,
+                label: "Ali",
+                children: [
+                    {
+                        id: 2.1,
+                        label: "PHP"
+                    },
+                    {
+                        id: 2.2,
+                        label: "NetSuite"
+                    }
+                ]
+            },
+            {
+                id: 3,
+                label: "Basit",
+                children: [
+                    {
+                        id: 3.1,
+                        label: "Node"
+                    },
+                    {
+                        id: 3.2,
+                        label: "Mongo"
+                    }
+                ]
+            }
         ];
     }])
 
@@ -34,28 +78,27 @@ angular.module('myApp', [])
         };
     }])
 
-    .factory('NvdNgNodeService', function () {
+    .factory('NvdNgTreeNodeService', function () {
         var Node = function (data) {
             this.id = null;
             this.label = "";
+            this.children = null;
             this.parentId = null;
             this.checked = false;
             this.opened = false;
-            this.loading = false;
             this.hasCheckedChildren = false;
-            this.tree = null;
 
             for ( var prop in data )
                 this[prop] = data[prop];
         };
 
-        //Node.makeNodes = function (items) {
-        //    var collection = [];
-        //    for (var $i = 0; $i < items.length; $i++) {
-        //        collection.push(new Node(items[$i]));
-        //    }
-        //    return collection;
-        //};
+        Node.makeNodes = function (items) {
+            var collection = [];
+            for (var $i = 0; $i < items.length; $i++) {
+                collection.push(new Node(items[$i]));
+            }
+            return collection;
+        };
 
         Node.prototype.toggleOpen = function () {
             this.opened = !this.opened;
@@ -82,7 +125,7 @@ angular.module('myApp', [])
         Node.prototype.updateParentCheckedStatus = function (tree) {
             var thisNode = this;
             if (thisNode.parentId) {
-                var parentNode = thisNode.getParent(tree);
+                var parentNode = thisNode.getParent(tree.nodes);
                 var allChecked = true;
                 var someChecked = false;
                 _.map(parentNode.children, function (childNode) {
@@ -117,21 +160,21 @@ angular.module('myApp', [])
         return Node;
     })
 
-    .factory('NvdNgTreeService',['NvdNgNodeService', function (Node) {
+    .factory('NvdNgTreeService',['NvdNgTreeNodeService', function (Node) {
         var Tree = function (config) {
             // default props
-            this.parentKey = "parentId"; // key for the node that defines the parent id
-            this.nodeLabel = function (node) { // default label for a node
+            this.parentKey = "parentId";
+            this.nodeLabel = function (node) {
                 return node.id + ": " +node.label;
             };
-            this._nextId = 1; // used when making nodes
+            this._nextId = 1;
 
             // override with user defined properties
             for (var prop in config)
                 this[prop] = config[prop];
 
             // make nodes
-            this.nodes = this.makeNodes(config.nodes);
+            this.nodes = Node.makeNodes(config.nodes);
         };
 
         Tree.prototype.getChecked = function () {
@@ -140,14 +183,6 @@ angular.module('myApp', [])
                     console.log(node.label+" is checked");
                 return node.checked === true;
             });
-        };
-
-        Tree.prototype.makeNodes = function (items) {
-            var collection = [];
-            for (var $i = 0; $i < items.length; $i++) {
-                collection.push(new Node(items[$i]));
-            }
-            return collection;
         };
 
         // build the api and return it
