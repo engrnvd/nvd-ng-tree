@@ -1,82 +1,38 @@
 'use strict';
+angular.module('NvdNg', []);
 
-angular.module('myApp', [])
-    .controller('MainCtrl', ['$scope', function ($scope) {
-        $scope.data = [
-            {
-                id: 1,
-                label: "Naveed",
-                opened: true,
-                children: [
-                    {
-                        id: 1.1,
-                        label: "Angular",
-                        children: [
-                            {
-                                id: 1.11,
-                                label: "Angular"
-                            },
-                            {
-                                id: 1.12,
-                                label: "Laravel",
-                                children: [
-                                    {id: 1.121,label:'elixir'},
-                                    {id: 1.122,label:'policies'}
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        id: 1.2,
-                        label: "Laravel"
-                    }
-                ]
-            },
-            {
-                id: 2,
-                label: "Ali",
-                children: [
-                    {
-                        id: 2.1,
-                        label: "PHP"
-                    },
-                    {
-                        id: 2.2,
-                        label: "NetSuite"
-                    }
-                ]
-            },
-            {
-                id: 3,
-                label: "Basit",
-                children: [
-                    {
-                        id: 3.1,
-                        label: "Node"
-                    },
-                    {
-                        id: 3.2,
-                        label: "Mongo"
-                    }
-                ]
-            }
-        ];
-    }])
+// @codekit-append "nvd-ng-tree-directive.js"
+// @codekit-append "nvd-ng-tree-node-service.js"
+// @codekit-append "nvd-ng-tree-tree-service.js"
 
-    .directive('nvdNgTree',['NvdNgTreeService', function (Tree) {
+angular.module('NvdNg')
+    .directive('nvdNgTree', ['NvdNgTreeService', function (Tree) {
         return {
             restrict: 'E',
-            templateUrl: 'nvd-ng-tree.html',
+            template: '<div ng-include="getContentUrl()"></div>',
             scope: {
-                items: '=items'
+                tree: '=tree',
+                templateUrl: '=templateUrl'
             },
             link: function (scope, elem, attrs) {
-                scope.tree = new Tree(scope.items);
+                scope.getContentUrl = function () {
+                    var url = scope.templateUrl;
+                    if (!url) {
+                        url = getCurrentScript();
+                        url = url.replace(/js$/, 'html');
+                    }
+                    return url;
+                };
+                var getCurrentScript = function () {
+                    var script = $("script[src*='nvd-ng-tree']");
+                    return script.get(0).src;
+                };
             }
         };
-    }])
+    }]);
 
-    .factory('NvdNgTreeNodeService', function () {
+angular.module('NvdNg')
+    .factory('NvdNgNodeService', function () {
         var Node = function (data) {
             this.id = null;
             this.label = "";
@@ -86,12 +42,11 @@ angular.module('myApp', [])
             this.opened = false;
             this.hasCheckedChildren = false;
 
-            for ( var prop in data )
+            for (var prop in data)
                 this[prop] = data[prop];
 
-            if(this.children)
-            {
-                this.children = Node.makeNodes( this.children );
+            if (this.children) {
+                this.children = Node.makeNodes(this.children);
                 var parentId = this.id;
                 _.map(this.children, function (node) {
                     node.parentId = parentId;
@@ -119,7 +74,7 @@ angular.module('myApp', [])
 
         Node.prototype.setChecked = function (value) {
             this.checked = value;
-            if(!value) this.hasCheckedChildren = false;
+            if (!value) this.hasCheckedChildren = false;
             // toggle-check for all children
             var thisNode = this;
             if (this.children) {
@@ -132,20 +87,18 @@ angular.module('myApp', [])
         Node.prototype.updateParentCheckedStatus = function (collection) {
             var thisNode = this;
             if (thisNode.parentId) {
-                console.log("the node has parent");
                 var parentNode = thisNode.getParent(collection);
-                console.log(parentNode);
                 var allChecked = true;
                 var someChecked = false;
                 _.map(parentNode.children, function (childNode) {
                     childNode.checked ? someChecked = true : allChecked = false;
-                    if( childNode.hasCheckedChildren )
+                    if (childNode.hasCheckedChildren)
                         someChecked = true;
                 });
                 parentNode.checked = allChecked;
                 parentNode.hasCheckedChildren = someChecked;
 
-                if(parentNode.parentId)
+                if (parentNode.parentId)
                     parentNode.updateParentCheckedStatus(collection);
             }
         };
@@ -154,12 +107,12 @@ angular.module('myApp', [])
             var thisNode = this;
             var secondaryCollection = [];
             var result = _.find(collection, function (node) {
-                if(node.children)
-                    secondaryCollection = _.union(secondaryCollection,node.children);
+                if (node.children)
+                    secondaryCollection = _.union(secondaryCollection, node.children);
                 return node.id == thisNode.parentId;
             });
 
-            if( !result && secondaryCollection )
+            if (!result && secondaryCollection)
                 return thisNode.getParent(secondaryCollection);
 
             return result;
@@ -167,19 +120,21 @@ angular.module('myApp', [])
 
         // build the api and return it
         return Node;
-    })
+    });
 
-    .factory('NvdNgTreeService',['NvdNgTreeNodeService', function (Node) {
+angular.module('NvdNg')
+    .factory('NvdNgTreeService', ['NvdNgNodeService', function (Node) {
         var Tree = function (items) {
             var thisTree;
             this.nodes = Node.makeNodes(items);
         };
 
         Tree.prototype.getChecked = function () {
-
+            return _.filter( this.nodes, function (node) {
+                return node.checked || node.hasCheckedChildren;
+            } );
         };
 
         // build the api and return it
         return Tree;
-    }])
-;
+    }]);

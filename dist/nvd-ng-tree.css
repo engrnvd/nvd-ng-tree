@@ -1,0 +1,18 @@
+.nvd-ng-tree {
+  padding-left: 2em; }
+  .nvd-ng-tree li {
+    list-style: none; }
+  .nvd-ng-tree .fa {
+    color: green; }
+  .nvd-ng-tree .node {
+    cursor: pointer;
+    padding: 0.2em 0.5em;
+    border: 1px solid transparent; }
+  .nvd-ng-tree .node:hover {
+    background-color: #baedf0;
+    border: 1px solid #90e2e7; }
+  .nvd-ng-tree .node-opener {
+    cursor: pointer;
+    padding-right: 0.3em; }
+  .nvd-ng-tree ul {
+    padding-left: 2em; }
