@@ -1,4 +1,4 @@
-angular.module('NvdNg')
+angular.module('CustomAngular')
     .factory('NvdNgNodeService', function () {
         var Node = function (data) {
             this.id = null;
@@ -15,7 +15,7 @@ angular.module('NvdNg')
             if (this.children) {
                 this.children = Node.makeNodes(this.children);
                 var parentId = this.id;
-                _.map(this.children, function (node) {
+                this.children.forEach(function (node) {
                     node.parentId = parentId;
                 });
             }
@@ -45,7 +45,7 @@ angular.module('NvdNg')
             // toggle-check for all children
             var thisNode = this;
             if (this.children) {
-                _.map(thisNode.children, function (childNode) {
+                thisNode.children.forEach(function (childNode) {
                     childNode.setChecked(value);
                 });
             }
@@ -57,7 +57,7 @@ angular.module('NvdNg')
                 var parentNode = thisNode.getParent(collection);
                 var allChecked = true;
                 var someChecked = false;
-                _.map(parentNode.children, function (childNode) {
+                parentNode.children.forEach(function (childNode) {
                     childNode.checked ? someChecked = true : allChecked = false;
                     if (childNode.hasCheckedChildren)
                         someChecked = true;
@@ -73,9 +73,9 @@ angular.module('NvdNg')
         Node.prototype.getParent = function (collection) {
             var thisNode = this;
             var secondaryCollection = [];
-            var result = _.find(collection, function (node) {
+            var result = collection.find(function (node) {
                 if (node.children)
-                    secondaryCollection = _.union(secondaryCollection, node.children);
+                    secondaryCollection = secondaryCollection.concat(node.children);
                 return node.id == thisNode.parentId;
             });
 

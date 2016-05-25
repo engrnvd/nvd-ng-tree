@@ -1,4 +1,4 @@
-angular.module('NvdNg')
+angular.module('CustomAngular')
     .directive('nvdNgTree', ['NvdNgTreeService', function (Tree) {
         return {
             restrict: 'E',

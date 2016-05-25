@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('myApp', ['NvdNg'])
+angular.module('myApp', ['CustomAngular'])
     .controller('MainCtrl', ['$scope', 'NvdNgTreeService', function ($scope, Tree) {
         var data = [
             {

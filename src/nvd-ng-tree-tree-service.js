@@ -1,4 +1,4 @@
-angular.module('NvdNg')
+angular.module('CustomAngular')
     .factory('NvdNgTreeService', ['NvdNgNodeService', function (Node) {
         var Tree = function (items) {
             var thisTree;
@@ -6,7 +6,7 @@ angular.module('NvdNg')
         };
 
         Tree.prototype.getChecked = function () {
-            return _.filter( this.nodes, function (node) {
+            return this.nodes.filter(function (node) {
                 return node.checked || node.hasCheckedChildren;
             } );
         };

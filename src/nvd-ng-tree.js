@@ -1,5 +1,5 @@
 'use strict';
-angular.module('NvdNg', []);
+angular.module('CustomAngular', []);
 
 // @codekit-append "nvd-ng-tree-directive.js"
 // @codekit-append "nvd-ng-tree-node-service.js"
